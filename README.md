@@ -1,8 +1,35 @@
 # Usage
 
-- Clone the source: https://github.com/Microsoft/WSL2-Linux-Kernel
-- Edit the config (`make CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl menuconfig`)
-- Build the kernel (`make CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl -j$(nproc)`)
-- Run `./headers.sh path/to/clone [path/to/headers/install/dir]`
+## Clone the source
+
+```
+git clone https://github.com/Microsoft/WSL2-Linux-Kernel kernel
+```
+
+## Edit the config
+
+```
+make -C kernel CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl menuconfig
+```
+
+
+## Make a copy
+
+```
+cp -r kernel kernel-clean
+```
+
+## Build the kernel 
+
+```
+make -C kernel CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl -j$(nproc)
+```
+
+## Create the headers
+
+```
+./headers.sh kernel kernel-clean [path/to/headers/install/dir]
+```
+
 
 
