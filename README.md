@@ -28,7 +28,7 @@ make -C kernel CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl -j$(nproc)
 ## Create the headers
 
 ```
-./headers.sh kernel kernel-clean [path/to/headers/install/dir]
+./headers.sh kernel kernel-clean [path/to/headers/install/dir (defaults to /lib/modules/.../build)]
 ```
 
 
