@@ -4,6 +4,9 @@ set -e; set -o pipefail
 # Heavily based on PKGBUILD from
 # https://www.archlinux.org/packages/core/x86_64/linux/
 
+# Copied from https://github.com/balena-os/module-headers, modified to use CC=cc/HOSTCC=cc
+# for building with clang, removed some driver copies and cross compilation support.
+
 function error()
 {
 	echo $(basename $0): $@ >&2
