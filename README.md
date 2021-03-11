@@ -9,6 +9,11 @@ git clone --depth=1 --branch=$BRANCH https://github.com/Microsoft/WSL2-Linux-Ker
 # (or copy some other config to that file)
 make -C kernel CC=cc HOSTCC=cc KCONFIG_CONFIG=Microsoft/config-wsl menuconfig
 
+# Clean the kernel
+make -C kernel HOSTCC=cc clean mrproper
+
+# Apply clang patch
+(cd kernel && git apply ../clang.patch)
 
 # Make a copy for later building /lib/modules
 cp -r kernel kernel-clean
