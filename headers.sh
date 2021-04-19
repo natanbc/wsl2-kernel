@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 die() {
     echo "$@" 1>&2;
@@ -12,17 +13,17 @@ fi
 ME=$(dirname $(readlink -f $0))
 OBJ=$(mktemp -d)
 OUT=$(mktemp -d)
-CONFIG=Microsoft/config-wsl
 
 BUILT="$1"
-[ -d "$BUILT" ]                || die "Unable to find built kernel"
-[ -r "$BUILT/Module.symvers" ] || die "Please build the kernel"
-[ -r "$BUILT/$CONFIG" ]        || die "Unable to find config file"
+[ -d "$BUILT" ]                || die "Unable to find built kernel at '$BUILT'"
+[ -r "$BUILT/Module.symvers" ] || die "Please build the kernel at '$BUILT'"
 
 SRC="$2"
-[ -d "$SRC" ] || die "Unable to find clean kernel"
+[ -d "$SRC" ] || die "Unable to find clean kernel at '$SRC'"
 
-DST=${3:-/lib/modules/$(make -C "$SRC" CC=cc HOSTCC=cc -s kernelrelease LOCALVERSION=)/build}
+make -C "$SRC" mrproper CC=cc HOSTCC=cc
+
+DST=${3:-/lib/modules/$(make -C "$BUILT" CC=cc HOSTCC=cc -s kernelrelease LOCALVERSION=)/build}
 
 echo "BUILT=$BUILT"
 echo "SRC=  $SRC"
@@ -30,10 +31,12 @@ echo "DST=  $DST"
 #exit 0
 
 cp "$BUILT/Module.symvers" "$OBJ/"
-cp "$BUILT/$CONFIG"        "$OBJ/.config"
+cp "$BUILT/.config"        "$OBJ/.config"
 "$ME/gen_mod_headers" "$OUT" "$SRC" "$OBJ"
 
-mkdir -p "$(dirname "$DST")"
-mv "$OUT" "$DST"
+echo "Copying results... (press enter)"
+read meme
+sudo mkdir -p "$(dirname "$DST")"
+sudo mv "$OUT" "$DST"
 
 rm -rf "$OBJ" "$OUT"
