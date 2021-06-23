@@ -38,3 +38,15 @@ index 4bf30e4b3eaaa..805c49d1b86da 100644
  				break;
  
  			ret = PTR_ERR(ksym) ?: -ENOENT;
+diff --git a/tools/perf/bench/inject-buildid.c b/tools/perf/bench/inject-buildid.c
+index 280227e3f..fbcb9d8da 100644
+--- a/tools/perf/bench/inject-buildid.c
++++ b/tools/perf/bench/inject-buildid.c
+@@ -378,6 +378,7 @@ static int inject_build_id(struct bench_data *data, u64 *max_rss)
+    wait4(data->pid, &status, 0, &rusage);
+    *max_rss = rusage.ru_maxrss;
+
++   (void)len;
+    pr_debug("   Child %d exited with %d\n", data->pid, status);
+
+    return 0;
