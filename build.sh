@@ -7,7 +7,7 @@ BRANCH=linux-msft-wsl-5.10.y
 git clone --depth=1 --branch=$BRANCH https://github.com/Microsoft/WSL2-Linux-Kernel kernel
 
 # Apply clang patch
-(cd kernel && git apply --ignore-space-change --ignore-whitespace ../clang.patch)
+(cd kernel && git apply ../clang.patch)
 
 # Copy, edit the config
 cat /proc/config.gz | gunzip > kernel-config

@@ -1,9 +1,8 @@
-
 diff --git a/kernel/module.c b/kernel/module.c
-index 4bf30e4b3eaaa..805c49d1b86da 100644
+index e20499309..94f926473 100644
 --- a/kernel/module.c
 +++ b/kernel/module.c
-@@ -2348,6 +2348,21 @@ static int verify_exported_symbols(struct module *mod)
+@@ -2315,6 +2315,21 @@ static int verify_exported_symbols(struct module *mod)
  	return 0;
  }
  
@@ -25,7 +24,7 @@ index 4bf30e4b3eaaa..805c49d1b86da 100644
  /* Change all symbols so that st_value encodes the pointer directly. */
  static int simplify_symbols(struct module *mod, const struct load_info *info)
  {
-@@ -2395,8 +2410,10 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
+@@ -2360,8 +2375,10 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
  				break;
  			}
  
@@ -43,10 +42,10 @@ index 280227e3f..fbcb9d8da 100644
 --- a/tools/perf/bench/inject-buildid.c
 +++ b/tools/perf/bench/inject-buildid.c
 @@ -378,6 +378,7 @@ static int inject_build_id(struct bench_data *data, u64 *max_rss)
-    wait4(data->pid, &status, 0, &rusage);
-    *max_rss = rusage.ru_maxrss;
-
-+   (void)len;
-    pr_debug("   Child %d exited with %d\n", data->pid, status);
-
-    return 0;
+ 	wait4(data->pid, &status, 0, &rusage);
+ 	*max_rss = rusage.ru_maxrss;
+ 
++	(void)len;
+ 	pr_debug("   Child %d exited with %d\n", data->pid, status);
+ 
+ 	return 0;
