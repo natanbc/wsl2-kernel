@@ -10,9 +10,11 @@ if [ $# -lt 2 ]; then
     die "Usage: $0 path/to/built/kernel path/to/clean/kernel [path/to/headers/install/dir]" 1>&2;
 fi
 
-ME=$(dirname $(readlink -f $0))
-OBJ=$(mktemp -d)
-OUT=$(mktemp -d)
+ME="$(dirname -- $(readlink -f -- "$0"))"
+TMP="$(mktemp -d)"
+trap "rm -rf $TMP" EXIT
+
+mkdir -p "$TMP/lib/modules"
 
 BUILT="$1"
 [ -d "$BUILT" ]                || die "Unable to find built kernel at '$BUILT'"
@@ -23,20 +25,60 @@ SRC="$2"
 
 make -C "$SRC" mrproper CC=cc HOSTCC=cc
 
-DST=${3:-/lib/modules/$(make -C "$BUILT" CC=cc HOSTCC=cc -s kernelrelease LOCALVERSION=)/build}
+VERSION="$(make -C "$BUILT" CC=cc HOSTCC=cc -s kernelrelease LOCALVERSION=)"
+DST="${3:-/lib/modules/$VERSION}"
 
+echo "VER=  $VERSION"
 echo "BUILT=$BUILT"
 echo "SRC=  $SRC"
 echo "DST=  $DST"
 #exit 0
 
+BASE="$TMP/lib/modules/$VERSION"
+OUT="$BASE/build"
+OBJ="$TMP/obj"
+mkdir "$OBJ"
+
 cp "$BUILT/Module.symvers" "$OBJ/"
 cp "$BUILT/.config"        "$OBJ/.config"
 "$ME/gen_mod_headers" "$OUT" "$SRC" "$OBJ"
 
-echo "Copying results... (press enter)"
-read meme
-sudo mkdir -p "$(dirname "$DST")"
-sudo mv "$OUT" "$DST"
+depmod -b "$TMP" "$VERSION"
 
-rm -rf "$OBJ" "$OUT"
+if [ -e "$DST" ]; then
+    while true; do
+        printf "Destination '$DST' already exists, overwrite? [Y/n] "
+        read r;
+        case "$r" in
+            y|Y|"")
+                break
+                ;;
+            n|N)
+                def_dir="lib_modules_$VERSION"
+                while true; do
+                    printf "New destination directory: [$def_dir] "
+                    read dir;
+                    if [ -z "$dir" ]; then
+                        dir="$def_dir"
+                    fi
+                    if [ -e "$dir" ]; then
+                        echo "Directory already exists"
+                        continue
+                    fi
+                    mkdir -p "$(dirname -- "$dir")"
+                    mv "$BASE" "$dir"
+                    exit 0
+                done
+                ;;
+            *)
+                echo "Invalid option"
+                ;;
+        esac
+    done
+else
+    echo "Press enter to write '$DST'"
+    read interactive
+fi
+
+sudo mkdir -p "$(dirname -- "$DST")"
+sudo mv "$BASE" "$DST"
