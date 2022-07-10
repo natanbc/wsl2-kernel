@@ -3,20 +3,31 @@ set -e
 
 # Clone the sources
 LINUX_BRANCH="linux-msft-wsl-5.10.y"
-ZFS_TAG="zfs-2.0.6"
+ZFS_TAG="zfs-2.1.5"
 
-git clone --depth=1 --branch="$LINUX_BRANCH"  https://github.com/Microsoft/WSL2-Linux-Kernel kernel
-git clone --depth=1 --branch="$ZFS_TAG"       https://github.com/openzfs/zfs                 zfs
+if [ ! -e kernel-clone ]; then
+    git clone --depth=1 --branch="$LINUX_BRANCH"  https://github.com/Microsoft/WSL2-Linux-Kernel kernel-clone
+fi
 
-# Apply clang patch
-(cd kernel && git apply ../clang.patch)
+if [ ! -e zfs-clone ]; then
+    git clone --depth=1 --branch="$ZFS_TAG"       https://github.com/openzfs/zfs                 zfs-clone
+    (cd zfs-clone && git apply ../zfs.patch)
+fi
+
+if [ ! -e kernel ]; then 
+    cp -r kernel-clone kernel
+fi
+if [ ! -e zfs ]; then
+    cp -r zfs-clone zfs
+fi
+
 
 # i'm done with this shit
 # this braindead build system refuses to use the CC/HOSTCC environment variables
 # and hardcodes `gcc` instead of `cc` as the default compiler
 mkdir -p fuck_this_shitty_build_system
 ln -sf "$(command -v cc)" fuck_this_shitty_build_system/gcc
-export PATH="$PATH:$(pwd)/fuck_this_shitty_build_system"
+export PATH="$(pwd)/fuck_this_shitty_build_system:$PATH"
 
 # shut up stop adding + to the end of my versions
 export LOCALVERSION=""
@@ -25,11 +36,13 @@ export LOCALVERSION=""
 export CC=cc
 export HOSTCC=cc
 
-if [ -e /proc/config.gz ]; then
-    cat /proc/config.gz | gunzip > kernel-config
-    make -C kernel KCONFIG_CONFIG=../kernel-config oldconfig menuconfig
-else
-    make -C kernel KCONFIG_CONFIG=../kernel-config defconfig menuconfig
+if [ ! -e kernel-config ]; then
+    if [ -e /proc/config.gz ]; then
+        cat /proc/config.gz | gunzip > kernel-config
+        make -C kernel KCONFIG_CONFIG=../kernel-config oldconfig menuconfig
+    else
+        make -C kernel KCONFIG_CONFIG=../kernel-config defconfig menuconfig
+    fi
 fi
 make -C kernel clean mrproper
 
@@ -51,7 +64,7 @@ echo "CONFIG_ZFS=y" >> kernel/.config
 cp -r kernel kernel-clean
 
 # Build the kernel 
-make -C kernel LOCALVERSION= -j$(nproc)
+make -C kernel LOCALVERSION= -j$(nproc) CC=clang
 
 # Create the headers
 ./headers.sh kernel kernel-clean # [path/to/headers/install/dir (defaults to /lib/modules/.../build)]
