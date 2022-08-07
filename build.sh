@@ -2,7 +2,7 @@
 set -e
 
 # Clone the sources
-LINUX_BRANCH="linux-msft-wsl-5.10.y"
+LINUX_BRANCH="linux-msft-wsl-5.15.y"
 ZFS_TAG="zfs-2.1.5"
 
 if [ ! -e kernel-clone ]; then
