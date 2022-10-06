@@ -2,8 +2,12 @@
 set -e
 
 # Clone the sources
+
+# Commits this has been last tested with
+# commit b5fe1633534aa323c1c09c2c9bf706ea973234e5
 LINUX_BRANCH="linux-msft-wsl-5.15.y"
-ZFS_TAG="zfs-2.1.5"
+# commit 6a6bd493988c75331deab06e5352a9bed035a87d
+ZFS_TAG="zfs-2.1.6"
 
 if [ ! -e kernel-clone ]; then
     git clone --depth=1 --branch="$LINUX_BRANCH"  https://github.com/Microsoft/WSL2-Linux-Kernel kernel-clone
