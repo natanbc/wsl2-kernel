@@ -1,21 +1,25 @@
 #!/bin/sh
-set -e
+set -euf
 
 # Clone the sources
 
-# Commits this has been last tested with
-# commit b5fe1633534aa323c1c09c2c9bf706ea973234e5
-LINUX_BRANCH="linux-msft-wsl-5.15.y"
-# commit 6a6bd493988c75331deab06e5352a9bed035a87d
-ZFS_TAG="zfs-2.1.6"
+# linux-msft-wsl-5.15.y
+LINUX_COMMIT="b5fe1633534aa323c1c09c2c9bf706ea973234e5"
+# 2.1.6
+ZFS_COMMIT="6a6bd493988c75331deab06e5352a9bed035a87d"
+
+get_repo() {
+    mkdir "$3"
+    curl -L "https://github.com/$1/archive/$2.tar.gz" | tar --strip-components=1 -C "$3" -xzf -
+}
 
 if [ ! -e kernel-clone ]; then
-    git clone --depth=1 --branch="$LINUX_BRANCH"  https://github.com/Microsoft/WSL2-Linux-Kernel kernel-clone
+    get_repo "Microsoft/WSL2-Linux-Kernel" "$LINUX_COMMIT" kernel-clone
 fi
 
 if [ ! -e zfs-clone ]; then
-    git clone --depth=1 --branch="$ZFS_TAG"       https://github.com/openzfs/zfs                 zfs-clone
-    (cd zfs-clone && git apply ../zfs.patch)
+    get_repo "openzfs/zfs"                 "$ZFS_COMMIT"   zfs-clone
+    (cd zfs-clone && patch -p1 < ../zfs.patch)
 fi
 
 if [ ! -e kernel ]; then 
