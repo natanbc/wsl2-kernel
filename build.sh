@@ -19,7 +19,7 @@ fi
 
 if [ ! -e zfs-clone ]; then
     get_repo "openzfs/zfs"                 "$ZFS_COMMIT"   zfs-clone
-    (cd zfs-clone && git apply ../zfs.patch)
+    (cd zfs-clone && patch -p1 < ../zfs.patch)
 fi
 
 if [ ! -e kernel ]; then 
