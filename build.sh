@@ -3,10 +3,10 @@ set -euf
 
 # Clone the sources
 
-# linux-msft-wsl-5.15.y
-LINUX_COMMIT="b5fe1633534aa323c1c09c2c9bf706ea973234e5"
-# 2.1.6
-ZFS_COMMIT="6a6bd493988c75331deab06e5352a9bed035a87d"
+# linux-msft-wsl-5.15.y / 5.15.79.1
+LINUX_COMMIT="7ade21a9d938a1b39c1754156537782a4be5dc50"
+# 2.1.7
+ZFS_COMMIT="21bd7661334cd865d17934bebbcaf8d3356279ee"
 
 get_repo() {
     mkdir "$3"
@@ -19,7 +19,6 @@ fi
 
 if [ ! -e zfs-clone ]; then
     get_repo "openzfs/zfs"                 "$ZFS_COMMIT"   zfs-clone
-    (cd zfs-clone && patch -p1 < ../zfs.patch)
 fi
 
 if [ ! -e kernel ]; then 
