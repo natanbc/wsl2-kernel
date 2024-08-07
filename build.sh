@@ -8,6 +8,22 @@ LINUX_COMMIT="149cbd13f7c04e5a9343532590866f31b5844c70"
 # 2.2.5
 ZFS_COMMIT="33174af15112ed5c53299da2d28e763b0163f428"
 
+
+DO_MENUCONFIG=0
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --menuconfig)
+            DO_MENUCONFIG=1
+            shift
+            ;;
+        *)
+            echo "Usage: $0 [--menuconfig]" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+
 get_repo() {
     mkdir "$3"
     curl -L "https://github.com/$1/archive/$2.tar.gz" | tar --strip-components=1 -C "$3" -xzf -
@@ -40,40 +56,41 @@ export PATH="$(pwd)/fuck_this_shitty_build_system:$PATH"
 export LOCALVERSION=""
 
 # the stupid kernel build system doesn't respect these but maybe zfs does
-export CC=cc
-export HOSTCC=cc
+export CC=clang
+export HOSTCC=clang
 
 if [ ! -e kernel-config ]; then
     if [ -e /proc/config.gz ]; then
         cat /proc/config.gz | gunzip > kernel-config
-        make -C kernel KCONFIG_CONFIG=../kernel-config oldconfig menuconfig
-    else
-        make -C kernel KCONFIG_CONFIG=../kernel-config defconfig menuconfig
     fi
 fi
-make -C kernel clean mrproper
-
-cp kernel-config kernel/.config
-
-
-sed -i "s|.*CONFIG_LOCALVERSION_AUTO.*|CONFIG_LOCALVERSION_AUTO=n|" kernel/.config
-make -C kernel prepare scripts
-sed -i "s|.*CONFIG_LOCALVERSION_AUTO.*|CONFIG_LOCALVERSION_AUTO=n|" kernel/.config
-
-echo "CONFIG_ZFS=y" >> kernel/.config
+make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC=clang clean mrproper prepare scripts
 
 # Add zfs to the kernel
 (cd zfs && ./autogen.sh)
-(cd zfs && ./configure --enable-linux-builtin --with-config=kernel --with-linux=../kernel --with-linux-obj=../kernel)
+(cd zfs && KERNEL_CC=clang ./configure --enable-linux-builtin --with-config=kernel --with-linux=../kernel --with-linux-obj=../kernel)
 (cd zfs && ./copy-builtin ../kernel)
+
+if [ "$DO_MENUCONFIG" = 1 ]; then
+    make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC=clang menuconfig
+fi
+
+sed -Ei "s|.*CONFIG_ZFS[ =].*|CONFIG_ZFS=y|" kernel-config
+sed -Ei "s|.*CONFIG_LOCALVERSION_AUTO[ =]*|CONFIG_LOCALVERSION_AUTO=n|" kernel-config
+
+if ! grep -q "CONFIG_ZFS=y" kernel-config; then
+    echo "CONFIG_ZFS=y" >> kernel-config
+fi
+
+cp kernel-config kernel/.config
 
 # Make a copy for later building /lib/modules
 cp -r kernel kernel-clean
 
 # Build the kernel 
-make -C kernel LOCALVERSION= -j$(nproc) CC=clang
+make -C kernel LOCALVERSION= CC=clang -j$(nproc)
 
 # Create the headers
-./headers.sh kernel kernel-clean # [path/to/headers/install/dir (defaults to /lib/modules/.../build)]
+./headers.sh kernel kernel-clean # [path/to/headers/install/dir (defaults to lib/modules/.../build)]
 
 

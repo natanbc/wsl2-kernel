@@ -23,10 +23,10 @@ BUILT="$1"
 SRC="$2"
 [ -d "$SRC" ] || die "Unable to find clean kernel at '$SRC'"
 
-make -C "$SRC" mrproper CC=cc HOSTCC=cc
+make -C "$SRC" mrproper CC=clang
 
-VERSION="$(make -C "$BUILT" CC=cc HOSTCC=cc -s kernelrelease LOCALVERSION=)"
-DST="${3:-/lib/modules/$VERSION}"
+VERSION="$(make -C "$BUILT" CC=clang -s kernelrelease LOCALVERSION=)"
+DST="${3:-lib/modules/$VERSION}"
 
 echo "VER=  $VERSION"
 echo "BUILT=$BUILT"
@@ -75,10 +75,7 @@ if [ -e "$DST" ]; then
                 ;;
         esac
     done
-else
-    echo "Press enter to write '$DST'"
-    read interactive
 fi
 
-sudo mkdir -p "$(dirname -- "$DST")"
-sudo mv "$BASE" "$DST"
+mkdir -p "$(dirname -- "$DST")"
+mv "$BASE" "$DST"
