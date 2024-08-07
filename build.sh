@@ -46,17 +46,6 @@ if [ ! -e zfs ]; then
 fi
 
 
-# i'm done with this shit
-# this braindead build system refuses to use the CC/HOSTCC environment variables
-# and hardcodes `gcc` instead of `cc` as the default compiler
-mkdir -p fuck_this_shitty_build_system
-ln -sf "$(command -v cc)" fuck_this_shitty_build_system/gcc
-export PATH="$(pwd)/fuck_this_shitty_build_system:$PATH"
-
-# shut up stop adding + to the end of my versions
-export LOCALVERSION=""
-
-# the stupid kernel build system doesn't respect these but maybe zfs does
 export CC=clang
 export HOSTCC=clang
 
@@ -89,7 +78,7 @@ cp kernel-config kernel/.config
 cp -r kernel kernel-clean
 
 # Build the kernel 
-make -C kernel LOCALVERSION= CC=clang -j$(nproc)
+make -C kernel LOCALVERSION= CC=clang -j$(nproc) vmlinux
 
 # Create the headers
 ./headers.sh kernel kernel-clean # [path/to/headers/install/dir (defaults to lib/modules/.../build)]
