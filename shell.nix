@@ -5,7 +5,7 @@
 }) {} }:
 
 let
-  llvm = pkgs.llvmPackages_16;
+  llvm = pkgs.llvmPackages_14;
 in
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
