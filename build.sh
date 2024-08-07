@@ -1,4 +1,5 @@
 #!/bin/sh
+# nix-shell ./shell.nix --run './build.sh ...'
 set -euf
 
 # Clone the sources
