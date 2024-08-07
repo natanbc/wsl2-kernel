@@ -4,8 +4,8 @@ set -euf
 
 # Clone the sources
 
-# linux-msft-wsl-6.6.y / 6.6.36.3
-LINUX_COMMIT="149cbd13f7c04e5a9343532590866f31b5844c70"
+# linux-msft-wsl-5.15.y / 5.15.153.1
+LINUX_COMMIT="33cad9854e0b15d9ee50b33a3f457ff31a37b291"
 # 2.2.5
 ZFS_COMMIT="33174af15112ed5c53299da2d28e763b0163f428"
 
