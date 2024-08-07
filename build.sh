@@ -3,10 +3,10 @@ set -euf
 
 # Clone the sources
 
-# linux-msft-wsl-5.15.y / 5.15.79.1
-LINUX_COMMIT="7ade21a9d938a1b39c1754156537782a4be5dc50"
-# 2.1.7
-ZFS_COMMIT="21bd7661334cd865d17934bebbcaf8d3356279ee"
+# linux-msft-wsl-6.6.y / 6.6.36.3
+LINUX_COMMIT="149cbd13f7c04e5a9343532590866f31b5844c70"
+# 2.2.5
+ZFS_COMMIT="33174af15112ed5c53299da2d28e763b0163f428"
 
 get_repo() {
     mkdir "$3"
