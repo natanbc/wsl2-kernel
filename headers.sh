@@ -23,9 +23,9 @@ BUILT="$1"
 SRC="$2"
 [ -d "$SRC" ] || die "Unable to find clean kernel at '$SRC'"
 
-make -C "$SRC" mrproper CC=clang
+make -C "$SRC" mrproper CC="$CC"
 
-VERSION="$(make -C "$BUILT" CC=clang -s kernelrelease LOCALVERSION=)"
+VERSION="$(make -C "$BUILT" CC="$CC" -s kernelrelease LOCALVERSION=)"
 DST="${3:-lib/modules/$VERSION}"
 
 echo "VER=  $VERSION"

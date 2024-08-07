@@ -4,8 +4,8 @@ set -e; set -o pipefail
 # Heavily based on PKGBUILD from
 # https://www.archlinux.org/packages/core/x86_64/linux/
 
-# Copied from https://github.com/balena-os/module-headers, modified to use CC=cc/HOSTCC=cc
-# for building with clang, removed some driver copies and cross compilation support.
+# Copied from https://github.com/balena-os/module-headers, modified to use CC="$CC"
+# removed some driver copies and cross compilation support.
 
 function error()
 {
@@ -100,7 +100,7 @@ trap pop EXIT
 [[ -d "$karch_dir" ]] || fatal "Unrecognised karch: $karch"
 
 echo Running modules_prepare...
-make CC=clang O="$target_dir" $build_opts modules_prepare
+make CC="$CC" O="$target_dir" $build_opts modules_prepare
 
 echo Copying required files...
 
@@ -223,9 +223,9 @@ if [[ -n "$prefix" ]]; then
 	sed -i 's|$(obj)/conf|x$(obj)/conf|' scripts/kconfig/Makefile
 
 	echo Building script binaries for target arch...
-	make CC=clang $build_opts scripts
+	make CC="$CC" $build_opts scripts
 	# for kernel 5.0.3 the following also builds scripts/mod which was removed from "make scripts" (see https://patchwork.kernel.org/patch/10690901/)
-	make CC=clang $build_opts prepare0
+	make CC="$CC" $build_opts prepare0
 
 	if [[ -e xtools/objtool/fixdep ]]; then
 	    if [[ -e tools/build/Makefile ]]; then
@@ -242,13 +242,13 @@ if [[ -n "$prefix" ]]; then
 	    fi
 
 	    echo Building objtool for target
-	    make -C tools/objtool CC=cc HOSTCC=cc HOSTLD="$LD" $build_opts
+	    make -C tools/objtool CC="$CC" HOSTCC=cc HOSTLD="$LD" $build_opts
 	    rm -rf tools/objtool/fixdep tools/objtool/fixdep_temp
 	    mv .backup.tools.build.Makefile tools/build/Makefile
 
             if [[ -e tools/build/Makefile ]]; then
 	        echo Building fixdep for target
-	        make -C tools/build CC=cc HOSTCC=cc HOSTLD="$LD" $build_opts
+	        make -C tools/build CC="$CC" HOSTCC=cc HOSTLD="$LD" $build_opts
 
     	        # move the target fixdep to the expected location
     	        mv tools/build/fixdep tools/objtool/

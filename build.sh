@@ -46,23 +46,22 @@ if [ ! -e zfs ]; then
 fi
 
 
-export CC=clang
-export HOSTCC=clang
+export CC="${CC:-cc}"
 
 if [ ! -e kernel-config ]; then
     if [ -e /proc/config.gz ]; then
         cat /proc/config.gz | gunzip > kernel-config
     fi
 fi
-make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC=clang clean mrproper prepare scripts
+make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC="$CC" clean mrproper prepare scripts
 
 # Add zfs to the kernel
 (cd zfs && ./autogen.sh)
-(cd zfs && KERNEL_CC=clang ./configure --enable-linux-builtin --with-config=kernel --with-linux=../kernel --with-linux-obj=../kernel)
+(cd zfs && KERNEL_CC="$CC" ./configure --enable-linux-builtin --with-config=kernel --with-linux=../kernel --with-linux-obj=../kernel)
 (cd zfs && ./copy-builtin ../kernel)
 
 if [ "$DO_MENUCONFIG" = 1 ]; then
-    make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC=clang menuconfig
+    make -C kernel LOCALVERSION= KCONFIG_CONFIG=../kernel-config CC="$CC" menuconfig
 fi
 
 sed -Ei "s|.*CONFIG_ZFS[ =].*|CONFIG_ZFS=y|" kernel-config
@@ -78,7 +77,7 @@ cp kernel-config kernel/.config
 cp -r kernel kernel-clean
 
 # Build the kernel 
-make -C kernel LOCALVERSION= CC=clang -j$(nproc) vmlinux
+make -C kernel LOCALVERSION= CC="$CC" -j$(nproc) vmlinux modules
 
 # Create the headers
 ./headers.sh kernel kernel-clean # [path/to/headers/install/dir (defaults to lib/modules/.../build)]

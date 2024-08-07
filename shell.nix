@@ -3,24 +3,20 @@
   url = "https://github.com/nixos/nixpkgs/archive/205fd4226592cc83fd4c0885a3e4c9c400efabb5.tar.gz";
   sha256 = "1f5d2g1p6nfwycpmrnnmc2xmcszp804adp16knjvdkj8nz36y1fg";
 }) {} }:
-
-let
-  llvm = pkgs.llvmPackages_14;
-in
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     autoconf
     automake
     bash
     bc
-    llvm.bintools
+    binutils
     bison
     cacert
-    llvm.clangUseLLVM
     cpio
     curl
     elfutils
     flex
+    gcc
     git
     gnumake
     kmod
